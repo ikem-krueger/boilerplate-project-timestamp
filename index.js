@@ -6,6 +6,18 @@ function unix2utc(timestamp) {
   return new Date(new Number(timestamp)).toUTCString();
 }
 
+function isUnixTimestamp(timestamp) {
+  const regex = /^\d{1,13}$/;
+
+  return regex.test(timestamp);
+}
+
+function isUTCString(string) {
+  const regex = /^\d{4}(-\d\d(-\d\d(T\d\d:\d\d(:\d\d)?(\.\d+)?(([+-]\d\d:\d\d)|Z)?)?)?)?$/;  // RegEx copied from here: https://stackoverflow.com/a/37563868/2012805
+
+  return regex.test(string);
+}
+
 // index.js
 // where your node app starts
 
@@ -37,27 +49,24 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+/*
+  FIXME:
+
+   - [ ] Your project can handle dates that can be successfully parsed by new Date(date_string)
+*/
 app.get("/api/:date", function (req, res) {
   const _date = req.params.date;
 
-  const is_unix_timestamp = /^\d{1,13}$/.test(_date);
-  const is_utc_string = /^\d{4}(-\d\d(-\d\d(T\d\d:\d\d(:\d\d)?(\.\d+)?(([+-]\d\d:\d\d)|Z)?)?)?)?$/.test(_date);
-
-  // ECMA Script Date Time String Format:
-  // https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-date-time-string-format
-
-  // RegEx copied from here:
-  // https://stackoverflow.com/questions/12756159/regex-and-iso8601-formatted-datetime/37563868#37563868
+  const is_unix_timestamp = isUnixTimestamp(_date);
+  const is_utc_string = isUTCString(_date);
 
   let date = { error: "Invalid Date" };
 
-  if (is_unix_timestamp) {
+  if (is_unix_timestamp)
     date = { unix: new Number(_date), utc: unix2utc(_date) };
-  }
 
-  if (is_utc_string) {
+  if (is_utc_string)
     date = { unix: utc2unix(_date), utc: unix2utc(utc2unix(_date)) };
-  }
 
   res.json(date);
 });
