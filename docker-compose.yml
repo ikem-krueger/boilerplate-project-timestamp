@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+    timestamp-microservice:
+        container_name: timestamp-microservice
+        image: app
+        restart: always
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: base
+        ports:
+            - "${PORT}:${PORT}"
